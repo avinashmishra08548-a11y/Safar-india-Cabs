@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Safar India Cabs | Book Your Ride</title>
+<meta name="description" content="Book one-way, round-trip and local taxi rides with Safar India Cabs.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<style>
+body{background:#020617;color:#f8fafc;font-family:system-ui,-apple-system,sans-serif}
+.app{max-width:440px;margin:auto;min-height:100vh;background:#0f172a;padding-bottom:80px}
+.field{width:100%;background:#020617;border:1px solid #334155;border-radius:12px;padding:11px;color:white;font-size:13px}
+.suggest{position:absolute;z-index:20;top:100%;left:0;right:0;background:#0f172a;border:1px solid #334155;border-radius:12px;max-height:180px;overflow:auto}
+.suggest button{display:block;width:100%;text-align:left;padding:10px;font-size:12px;border-bottom:1px solid #1e293b}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="sticky top-0 z-30 flex items-center justify-between border-b border-slate-800 bg-slate-950/95 px-4 py-3">
+<div class="flex items-center gap-3"><div class="rounded-xl bg-amber-500 p-2 font-black text-slate-950">🚕</div><div><h1 class="text-sm font-black tracking-wide text-amber-400">SAFAR INDIA CABS</h1><p class="text-[10px] text-slate-400">Your journey, our responsibility</p></div></div>
+<button id="loginBtn" class="rounded-xl border border-slate-700 px-3 py-2 text-xs font-bold text-amber-400">Login</button>
+</header>
+<main class="space-y-4 p-4">
+<div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs"><b>Reliable rides • Clear fare estimates</b><p class="mt-1 text-slate-300">Final fare and inclusions should be confirmed with the operator before payment.</p></div>
+<section class="space-y-4 rounded-2xl border border-slate-800 bg-slate-900 p-4">
+<div class="grid grid-cols-3 gap-1 rounded-xl bg-slate-950 p-1 text-xs font-bold">
+<button data-trip="oneway" class="trip rounded-lg bg-amber-500 py-2 text-slate-950">One-Way</button>
+<button data-trip="roundtrip" class="trip rounded-lg py-2 text-slate-400">Round Trip</button>
+<button data-trip="local" class="trip rounded-lg py-2 text-slate-400">Local</button>
+</div>
+<form id="bookingForm" class="space-y-3">
+<div class="relative"><label class="mb-1 block text-[10px] font-bold uppercase text-slate-400">Pickup location</label><input id="pickup" class="field" required minlength="2" placeholder="e.g. Delhi"><div id="pickupSuggestions" class="suggest hidden"></div></div>
+<div id="dropWrap" class="relative"><label class="mb-1 block text-[10px] font-bold uppercase text-slate-400">Drop location</label><input id="drop" class="field" required minlength="2" placeholder="e.g. Agra"><div id="dropSuggestions" class="suggest hidden"></div></div>
+<div class="grid grid-cols-2 gap-3"><div><label class="mb-1 block text-[10px] font-bold uppercase text-slate-400">Pickup date</label><input id="date" type="date" class="field" required></div><div><label class="mb-1 block text-[10px] font-bold uppercase text-slate-400">Pickup time</label><input id="time" type="time" class="field" required></div></div>
+<div><label class="mb-1 block text-[10px] font-bold uppercase text-slate-400">Vehicle</label><select id="car" class="field"><option value="hatchback">Hatchback — ₹11/km</option><option value="sedan" selected>Sedan — ₹12/km</option><option value="suv">SUV — ₹16/km</option><option value="innova">Innova Crysta — ₹20/km</option></select></div>
+<div class="rounded-xl border border-slate-800 bg-slate-950 p-3"><div class="flex justify-between text-xs"><span>Estimated distance</span><b id="distance">130 km minimum</b></div><div class="mt-2 flex justify-between text-xs"><span>Estimated total</span><b id="total" class="text-white">₹1,560</b></div><div class="mt-2 flex justify-between text-xs"><span>20% advance</span><b id="advance" class="text-lg text-amber-400">₹312</b></div><p id="fareNote" class="mt-2 text-[10px] text-slate-400">Estimate only. Tolls, state tax, parking and driver allowance are not confirmed as included.</p></div>
+<label class="flex items-start gap-2 text-[10px] text-slate-400"><input id="terms" type="checkbox" required class="mt-0.5"><span>I understand this is an estimate and booking is confirmed only after payment verification and operator confirmation.</span></label>
+<button class="w-full rounded-xl bg-amber-500 py-3 text-sm font-black text-slate-950">Continue to secure advance payment</button>
+</form>
+</section>
+<section class="rounded-2xl border border-slate-800 bg-slate-900 p-4"><h2 class="mb-3 text-sm font-black">My bookings</h2><div id="rides" class="space-y-3 text-xs text-slate-300">Login to see bookings saved to your device. Firebase sync can be enabled in setup.</div></section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 z-30 mx-auto grid max-w-[440px] grid-cols-2 border-t border-slate-800 bg-slate-950 py-3 text-center text-xs"><a href="#bookingForm" class="font-bold text-amber-400">🚕 Book Cab</a><a href="#rides" class="text-slate-300">📋 My Bookings</a></nav>
+<div id="loginModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4"><div class="w-full max-w-sm rounded-2xl border border-slate-700 bg-slate-900 p-5"><div class="mb-3 flex justify-between"><b>Customer login</b><button id="closeLogin">✕</button></div><p class="mb-3 text-xs text-slate-400">Demo login is disabled for safety. Configure Firebase Phone Authentication in README before accepting real customers.</p><label class="mb-1 block text-xs">Name</label><input id="name" class="field mb-3" placeholder="Full name"><label class="mb-1 block text-xs">Mobile number</label><input id="phone" class="field mb-3" inputmode="numeric" maxlength="10" placeholder="10-digit number"><div id="recaptcha-container" class="mb-3"></div><button id="sendOtp" class="w-full rounded-xl bg-amber-500 py-2 font-bold text-slate-950">Send real OTP</button><input id="otp" class="field my-3" inputmode="numeric" placeholder="OTP received by SMS"><button id="verifyOtp" class="w-full rounded-xl border border-slate-700 py-2 font-bold">Verify OTP</button><p id="loginStatus" class="mt-3 text-xs text-amber-400"></p></div></div>
+<div id="notice" class="fixed bottom-20 left-1/2 z-[60] hidden max-w-[90%] -translate-x-1/2 rounded-xl bg-slate-800 px-4 py-3 text-xs shadow-xl"></div>
+</div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+/* Paste your Firebase web config here. Until configured, login/payment stays disabled. */
+const firebaseConfig = {
+  apiKey: "PASTE_FIREBASE_API_KEY",
+  authDomain: "PASTE_PROJECT.firebaseapp.com",
+  projectId: "PASTE_PROJECT_ID",
+  appId: "PASTE_FIREBASE_APP_ID"
+};
+const firebaseReady = firebaseConfig.apiKey !== "PASTE_FIREBASE_API_KEY";
+let auth=null, db=null, confirmation=null, recaptcha=null, user=null, userName="";
+if(firebaseReady){const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getFirestore(app);onAuthStateChanged(auth,async u=>{user=u;document.getElementById("loginBtn").textContent=u?"Account":"Login";await loadBookings();});}
+const $=id=>document.getElementById(id);
+let trip="oneway", km=130, routeOk=false, picked={pickup:null,drop:null};
+const rates={hatchback:11,sedan:12,suv:16,innova:20};
+const money=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+function toast(s){$("notice").textContent=s;$("notice").classList.remove("hidden");setTimeout(()=> $("notice").classList.add("hidden"),4000);}
+function fare(){let min=trip==="roundtrip"?250:trip==="oneway"?130:80;let distance=Math.max(min,km);if(trip==="local")distance=80;$("distance").textContent=routeOk?distance+" km (route estimate)":distance+" km minimum";let total=distance*rates[$("car").value]+(trip==="roundtrip"?300:0);$("total").textContent=money(total);$("advance").textContent=money(total*.2);return {distance,total,advance:Math.round(total*.2)};}
+document.querySelectorAll(".trip").forEach(b=>b.addEventListener("click",()=>{trip=b.dataset.trip;document.querySelectorAll(".trip").forEach(x=>x.className="trip rounded-lg py-2 text-slate-400");b.className="trip rounded-lg bg-amber-500 py-2 text-slate-950";$("dropWrap").classList.toggle("hidden",trip==="local");$("drop").required=trip!=="local";fare();}));
+$("car").addEventListener("change",fare);
+function setDateMin(){const d=new Date();const local=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10);$("date").min=local;$("date").value=local;}
+setDateMin();
+async function suggest(which){const val=$(which).value.trim(), box=$(which==="pickup"?"pickupSuggestions":"dropSuggestions");if(val.length<3){box.classList.add("hidden");return;}try{const r=await fetch("https://nominatim.openstreetmap.org/search?format=json&countrycodes=in&limit=5&q="+encodeURIComponent(val));const list=await r.json();box.replaceChildren();list.forEach(p=>{const b=document.createElement("button");b.type="button";b.textContent=p.display_name;b.addEventListener("click",()=>{$(which).value=p.display_name.split(",")[0];picked[which]={lat:+p.lat,lon:+p.lon};box.classList.add("hidden");route();});box.append(b);});box.classList.toggle("hidden",!list.length);}catch{box.classList.add("hidden");}}
+let debounce={};
+["pickup","drop"].forEach(id=>$(id).addEventListener("input",()=>{picked[id]=null;clearTimeout(debounce[id]);debounce[id]=setTimeout(()=>suggest(id),450);}));
+async function route(){routeOk=false;if(trip==="local"||!picked.pickup||!picked.drop){fare();return;}try{const u=`https://router.project-osrm.org/route/v1/driving/${picked.pickup.lon},${picked.pickup.lat};${picked.drop.lon},${picked.drop.lat}?overview=false`;const r=await fetch(u);const j=await r.json();if(j.code==="Ok"&&j.routes?.length){km=Math.ceil(j.routes[0].distance/1000);routeOk=true;}}catch{}fare();}
+function openLogin(){if(!firebaseReady){toast("Firebase setup required. Follow README setup instructions.");return;}$("loginModal").classList.remove("hidden");$("loginModal").classList.add("flex");if(!recaptcha){recaptcha=new RecaptchaVerifier(auth,"recaptcha-container",{});recaptcha.render().catch(()=>{});}}
+$("loginBtn").addEventListener("click",openLogin);$("closeLogin").addEventListener("click",()=>{$("loginModal").classList.add("hidden");$("loginModal").classList.remove("flex");});
+$("sendOtp").addEventListener("click",async()=>{if(!firebaseReady)return;const p=$("phone").value.trim();userName=$("name").value.trim();if(!/^\d{10}$/.test(p)||!userName){$("loginStatus").textContent="Name and valid 10-digit number required.";return;}try{confirmation=await signInWithPhoneNumber(auth,"+91"+p,recaptcha);$("loginStatus").textContent="OTP sent. SMS charges/quotas may apply."; }catch(e){$("loginStatus").textContent=e.message;recaptcha?.clear();recaptcha=null;}});
+$("verifyOtp").addEventListener("click",async()=>{if(!confirmation)return;$("loginStatus").textContent="";try{await confirmation.confirm($("otp").value.trim());localStorage.setItem("safar_name",userName);$("loginModal").classList.add("hidden");$("loginModal").classList.remove("flex");await loadBookings();}catch(e){$("loginStatus").textContent="OTP verification failed: "+e.message;}});
+async function loadBookings(){const el=$("rides");if(!user||!db){el.textContent="Sign in after Firebase setup to see bookings.";return;}try{const q=query(collection(db,"bookings"),where("uid","==",user.uid));const snap=await getDocs(q);el.replaceChildren();if(snap.empty){el.textContent="No bookings yet.";return;}snap.forEach(doc=>{const b=doc.data(),card=document.createElement("div");card.className="rounded-xl border border-slate-700 p-3";card.textContent=`${b.bookingId} • ${b.status} — ${b.pickup} to ${b.drop} — ${money(b.total)} (advance ${money(b.advance)})`;el.append(card);});}catch(e){el.textContent="Bookings could not load. Check Firestore rules/setup.";}}
+$("bookingForm").addEventListener("submit",async e=>{e.preventDefault();if(!firebaseReady||!auth||!user){toast("Please configure Firebase and login with real OTP first.");openLogin();return;}if(!$("terms").checked)return;const f=fare();const booking={pickup:$("pickup").value.trim(),drop:trip==="local"?"Local city rental":$("drop").value.trim(),tripType:trip,car:$("car").value,date:$("date").value,time:$("time").value,distanceKm:f.distance,total:f.total,advance:f.advance};if(booking.pickup.length<2||(trip!=="local"&&booking.drop.length<2)){toast("Enter pickup and drop locations.");return;}try{const orderRes=await fetch("/api/create-order",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({amount:booking.advance,booking})});const order=await orderRes.json();if(!orderRes.ok)throw new Error(order.error||"Could not create payment order");const checkout=new Razorpay({key:order.keyId,amount:order.amount,currency:"INR",name:"Safar India Cabs",description:"Advance for cab booking",order_id:order.orderId,prefill:{contact:user.phoneNumber||""},theme:{color:"#f59e0b"},handler:async response=>{try{const verify=await fetch("/api/verify-payment",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+await user.getIdToken()},body:JSON.stringify({...response,booking,customerName:localStorage.getItem("safar_name")||"Customer",phone:user.phoneNumber||""})});const result=await verify.json();if(!verify.ok)throw new Error(result.error||"Verification failed");toast("Payment verified. Booking ID: "+result.bookingId);await loadBookings();}catch(err){toast("Payment received? Verification pending. Contact support with payment ID. "+err.message);}}});checkout.on("payment.failed",r=>toast("Payment failed: "+(r.error?.description||"Please retry")));checkout.open();}catch(err){toast(err.message);}});
+fare();
+</script>
+</body></html>

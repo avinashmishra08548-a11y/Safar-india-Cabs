@@ -1,0 +1,9 @@
+{
+  "name": "safar-india-cabs",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "razorpay": "^2.9.5"
+  }
+}
